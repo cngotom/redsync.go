@@ -197,7 +197,7 @@ func (m *Mutex) Lock() error {
 
 			conn := node.Get()
 			reply, err := redis.String(conn.Do("set", m.Name, value, "nx", "px", int(expiry/time.Millisecond)))
-			conn.Close()
+			defer conn.Close()
 			if err != nil {
 				continue
 			}
@@ -225,7 +225,7 @@ func (m *Mutex) Lock() error {
 
 			conn := node.Get()
 			_, err := delScript.Do(conn, m.Name, value)
-			conn.Close()
+			defer conn.Close()
 			if err != nil {
 				continue
 			}
@@ -272,7 +272,7 @@ func (m *Mutex) Touch() bool {
 
 		conn := node.Get()
 		reply, err := touchScript.Do(conn, m.Name, value, reset)
-		conn.Close()
+		defer conn.Close()
 		if err != nil {
 			continue
 		}
@@ -310,7 +310,7 @@ func (m *Mutex) Unlock() bool {
 
 		conn := node.Get()
 		status, err := delScript.Do(conn, m.Name, value)
-		conn.Close()
+		defer conn.Close()
 		if err != nil {
 			continue
 		}
